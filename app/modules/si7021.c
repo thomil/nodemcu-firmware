@@ -117,7 +117,7 @@ static int si7021_lua_setup(lua_State* L) {
 	// check for device on i2c bus
 	uint8_t buf_r[1];
 	read_reg(SI7021_CMD_READ_RHT_REG, buf_r, 1);
-	if (buf_r[0] != 0x3A)
+	if ((buf_r[0] & 0xC7) != 0x02)
 		return luaL_error(L, "found no device");
 
 	return 0;
@@ -188,7 +188,7 @@ static int si7021_lua_read(lua_State* L) {
 	int humdec = (int)((hum - (int)hum) * 1000);
 
 	uint8_t buf_t[2];	// two byte data, no crc on combined temp measurement
-	read_reg(SI7021_CMD_READ_PREV_TEMP, buf_t, 2);
+	read_reg(SI7021_CMD_MEASURE_TEMP_HOLD, buf_t, 2);
 	double temp = (uint16_t)((buf_t[0] << 8) | buf_t[1]);
 	temp = ((temp * 175.72) / 65536 - 46.85);
 	int tempdec = (int)((temp - (int)temp) * 1000);
